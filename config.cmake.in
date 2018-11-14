@@ -1,0 +1,58 @@
+#
+# The MIT License
+#
+# Copyright (c) 2017 Rafael Muñoz-Salinas
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+
+# ===================================================================================
+#  @PROJECT_NAME@ CMake configuration file
+#
+#             ** File generated automatically, do not modify **
+#
+#  Usage from an external project:
+#    In your CMakeLists.txt, add these lines:
+#
+#    find_package(@PROJECT_NAME@ REQUIRED )
+#    target_link_libraries(MY_TARGET_NAME ${@PROJECT_NAME@_LIBS})
+#
+#    This file will define the following variables:
+#      - @PROJECT_NAME@_LIBS          : The list of libraries to links against.
+#      - @PROJECT_NAME@_LIB_DIR       : The directory where lib files are.
+#      - @PROJECT_NAME@_VERSION       : The version of this @PROJECT_NAME@ build. Example: "1.2.0"
+#      - @PROJECT_NAME@_VERSION_MAJOR : Major version part of VERSION. Example: "1"
+#      - @PROJECT_NAME@_VERSION_MINOR : Minor version part of VERSION. Example: "2"
+#      - @PROJECT_NAME@_VERSION_PATCH : Patch version part of VERSION. Example: "0"
+#
+# ===================================================================================
+
+include_directories("@CMAKE_INSTALL_PREFIX@/include")
+set(@PROJECT_NAME@_INCLUDE_DIRS "@CMAKE_INSTALL_PREFIX@/include")
+
+link_directories("@CMAKE_INSTALL_PREFIX@/lib")
+set(@PROJECT_NAME@_LIB_DIR "@CMAKE_INSTALL_PREFIX@/lib")
+
+set(@PROJECT_NAME@_LIBS @REQUIRED_LIBRARIES@ @PROJECT_NAME@)
+
+set(@PROJECT_NAME@_FOUND TRUE)
+set(@PROJECT_NAME@_VERSION @PROJECT_VERSION@)
+set(@PROJECT_NAME@_VERSION_MAJOR @PROJECT_VERSION_MAJOR@)
+set(@PROJECT_NAME@_VERSION_MINOR @PROJECT_VERSION_MINOR@)
+set(@PROJECT_NAME@_VERSION_PATCH @PROJECT_VERSION_PATCH@)

@@ -6,3 +6,8 @@ FBoW (Fast Bag of Words) is an extremely optimized version of the [DBoW2](https:
 The library is highly optimized to speed up the Bag of Words creation using AVX,SSE and MMX instructions.  
 In loading a vocabulary, FBoW is about 80x faster than DBoW2.  
 In transforming an image into Bag of Words using on machines with AVX instructions, it is about 6.4x faster.  
+
+## License
+
+This software is distributed under MIT License.  
+See the [LICENSE](./LICENSE).

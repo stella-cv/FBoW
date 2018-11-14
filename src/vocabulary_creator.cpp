@@ -126,7 +126,6 @@ void  VocabularyCreator::createLevel(  int parent, int curL,bool recursive){
     }
     else{
          //create the assigment vectors and reserve memory
-        const auto &parent_assign=id_assigments[parent];
         for(size_t i=0;i<_params.k;i++){
             id_assigments.create( parent*_params.k+1+i,findices.size()/_params.k);
             assigments_ref.push_back( id_assigments[ parent*_params.k+1+i]);

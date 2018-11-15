@@ -23,10 +23,13 @@
 #
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
-link_libraries(${PROJECT_NAME})
 
-add_executable(fbow_dump_features fbow_dump_features.cpp cmd_line_parser.h dir_reader.h)
-add_executable(fbow_create_vocabulary fbow_create_vocabulary.cpp cmd_line_parser.h)
-add_executable(fbow_transform fbow_transform.cpp cmd_line_parser.h)
+add_executable(fbow_dump_features fbow_dump_features.cpp)
+add_executable(fbow_create_vocabulary fbow_create_vocabulary.cpp)
+add_executable(fbow_transform fbow_transform.cpp)
+
+target_link_libraries(fbow_dump_features ${OpenCV_LIBS})
+target_link_libraries(fbow_create_vocabulary ${OpenCV_LIBS} fbow_lib)
+target_link_libraries(fbow_transform ${OpenCV_LIBS} fbow_lib)
 
 install(TARGETS fbow_dump_features fbow_create_vocabulary fbow_transform RUNTIME DESTINATION bin)

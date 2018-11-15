@@ -118,7 +118,6 @@ install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake" DESTINATION "s
 # ------------------------------------------------------
 
 set(WARNINGS_ARE_ERRORS OFF CACHE BOOL "Treat warnings as errors")
-set(WHOLE_PROGRAM_OPTIMIZATION ON CACHE BOOL "Flags for whole program optimization")
 
 set(EXTRA_C_FLAGS "")
 set(EXTRA_C_FLAGS_RELEASE "")
@@ -176,13 +175,6 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang" 
     # -Wno-long-long is required in 64bit systems when including sytem headers
     if(${CMAKE_SYSTEM_PROCESSOR} MATCHES x86_64* OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES amd64*)
 		set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Wno-long-long")
-    endif()
-
-    # whole program optimization
-    if(WHOLE_PROGRAM_OPTIMIZATION)
-        if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR MINGW)
-            set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} -fwhole-program")
-        endif()
     endif()
 
     # apply options

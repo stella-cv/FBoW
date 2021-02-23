@@ -85,8 +85,12 @@ option(INSTALL_FBOW_DEV "Set to OFF to disable source installation" ON)
 #   find dependencies
 # ------------------------------------------------------
 
-find_package(OpenCV 3.0 REQUIRED)
+find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
+
+if(OpenCV_VERSION VERSION_LESS 3.0)
+    message(FATAL_ERROR "OpenCV 3.0 or higher is required.")
+endif()
 
 if(USE_CONTRIB)
     add_definitions(-DUSE_CONTRIB)

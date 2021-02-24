@@ -25,9 +25,8 @@
 add_definitions(-DNOMINMAX)
 
 set(SOURCES fbow.cpp vocabulary_creator.cpp)
-set(HEADERS fbow.h fbow_exports.h vocabulary_creator.h cpu.h)
 
-add_library(fbow_lib ${SOURCES} ${HEADERS})
+add_library(fbow_lib ${SOURCES})
 
 set_target_properties(fbow_lib PROPERTIES
         DEFINE_SYMBOL FBOW_DLL_EXPORT
@@ -37,12 +36,14 @@ set_target_properties(fbow_lib PROPERTIES
         OUTPUT_NAME ${PROJECT_NAME})
 
 target_link_libraries(fbow_lib ${OpenCV_LIBS} ${OpenMP_CXX_LIBRARIES})
+target_include_directories(fbow_lib PUBLIC
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>)
 
 install(TARGETS fbow_lib
         RUNTIME DESTINATION bin COMPONENT main
         LIBRARY DESTINATION lib PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE COMPONENT main
         ARCHIVE DESTINATION lib COMPONENT main)
 
-if(INSTALL_FBOW_DEV)
-    install(FILES ${HEADERS} DESTINATION include/fbow COMPONENT main)
-endif()
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
+        DESTINATION include)

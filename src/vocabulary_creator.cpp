@@ -24,7 +24,7 @@ THE SOFTWARE.
 
 */
 
-#include "vocabulary_creator.h"
+#include "fbow/vocabulary_creator.h"
 #ifdef USE_OPENMP
 #include <omp.h>
 #else

@@ -79,7 +79,6 @@ option(USE_CONTRIB "Set ON to use OpenCV contrib modules" OFF)
 option(USE_AVX "Set on/off" ON)
 option(USE_SSE3 "Set on/off" ON)
 option(USE_SSE4 "Set on/off" ON)
-option(INSTALL_FBOW_DEV "Set to OFF to disable source installation" ON)
 
 # ------------------------------------------------------
 #   find dependencies

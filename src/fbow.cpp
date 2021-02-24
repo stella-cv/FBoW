@@ -24,7 +24,7 @@ THE SOFTWARE.
 
 */
 
-#include "fbow.h"
+#include "fbow/fbow.h"
 #include <fstream>
 #include <cstring>
 #include <limits>

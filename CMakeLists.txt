@@ -113,8 +113,8 @@ add_custom_target(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/c
 #   (if you use windows take care with paths)
 # ------------------------------------------------------
 
-configure_file("${PROJECT_SOURCE_DIR}/config.cmake.in" "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake")
-install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake" DESTINATION "share/${PROJECT_NAME}/")
+configure_file("${PROJECT_SOURCE_DIR}/config.cmake.in" "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake" @ONLY)
+install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake" DESTINATION "share/cmake/${PROJECT_NAME}/")
 
 # ------------------------------------------------------
 #   program optimization and debug options
@@ -259,10 +259,44 @@ set(CMAKE_EXE_LINKER_FLAGS_RELEASE ${CMAKE_EXE_LINKER_FLAGS_RELEASE} ${EXTRA_EXE
 set(CMAKE_EXE_LINKER_FLAGS_DEBUG ${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${EXTRA_EXE_LINKER_FLAGS_DEBUG})
 
 # ------------------------------------------------------
-#   utility directories
+#   fbow library
 # ------------------------------------------------------
 
-add_subdirectory(src)
+add_definitions(-DNOMINMAX)
+
+set(SOURCES
+    src/fbow.cpp
+    src/vocabulary_creator.cpp)
+
+add_library(fbow ${SOURCES})
+
+set_target_properties(fbow PROPERTIES
+        DEFINE_SYMBOL FBOW_DLL_EXPORT
+        VERSION ${PROJECT_VERSION}
+        SOVERSION ${PROJECT_SOVERSION}
+        CLEAN_DIRECT_OUTPUT 1
+        OUTPUT_NAME ${PROJECT_NAME})
+
+target_link_libraries(fbow ${OpenCV_LIBS} ${OpenMP_CXX_LIBRARIES})
+target_include_directories(fbow PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>)
+
+install(TARGETS fbow
+        EXPORT fbowTargets)
+
+install(EXPORT fbowTargets
+        NAMESPACE fbow::
+        DESTINATION share/cmake/fbow/)
+
+export(EXPORT fbowTargets)
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
+        DESTINATION include)
+
+# ------------------------------------------------------
+#   utility directories
+# ------------------------------------------------------
 
 if(BUILD_UTILS)
     add_subdirectory(utils)

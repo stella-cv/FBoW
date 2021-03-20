@@ -167,7 +167,19 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang" 
         set(USE_SSE3 OFF CACHE BOOL "Enable SSE3 for GCC/Clang")
         set(USE_SSE4 OFF CACHE BOOL "Enable SSE4 for GCC/Clang")
     endif()
-    set(USE_AVX ON CACHE BOOL "Enable AVX for GCC/Clang")
+    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES aarch64*)
+        # aarch64 system
+        set(USE_O2 ON CACHE BOOL "Enable -O2 for GCC/Clang")
+        set(USE_FAST_MATH OFF CACHE BOOL "Enable -ffast-math for GCC/Clang")
+        set(USE_AVX OFF CACHE BOOL "Enable AVX for GCC/Clang" FORCE)
+        set(USE_MMX OFF CACHE BOOL "Enable MMX for GCC/Clang" FORCE)
+        set(USE_SSE OFF CACHE BOOL "Enable SSE for GCC/Clang" FORCE)
+        set(USE_SSE2 OFF CACHE BOOL "Enable SSE2 for GCC/Clang" FORCE)
+        set(USE_SSE3 OFF CACHE BOOL "Enable SSE3 for GCC/Clang" FORCE)
+        set(USE_SSE4 OFF CACHE BOOL "Enable SSE4 for GCC/Clang" FORCE)
+    else()
+        set(USE_AVX ON CACHE BOOL "Enable AVX for GCC/Clang")
+    endif()
 
     # warning options
     set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Wall")

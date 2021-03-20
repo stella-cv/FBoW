@@ -283,7 +283,8 @@ target_include_directories(fbow PUBLIC
         $<INSTALL_INTERFACE:include>)
 
 install(TARGETS fbow
-        EXPORT fbowTargets)
+        EXPORT fbowTargets
+        LIBRARY DESTINATION lib)
 
 install(EXPORT fbowTargets
         NAMESPACE fbow::

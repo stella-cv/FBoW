@@ -31,7 +31,7 @@ THE SOFTWARE.
 #include <cstdint>
 #include <cstring>
 #include <string>
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__arm64__) || defined(__aarch64__)
 
 #else
 #if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || defined(_M_IX86)
@@ -75,7 +75,7 @@ private:
     static bool inline detect_OS_AVX512();
     static inline uint64_t xgetbv(unsigned int x);
 };
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__arm64__) || defined(__aarch64__)
 
 void cpu::cpuid(int32_t out[4], int32_t x){}
 #else
@@ -118,7 +118,7 @@ bool  cpu::detect_OS_x64(){ return true;}
 ////////////////////////////////////////////////////////////////////////////////
 bool cpu::detect_OS_AVX(){
     //  Copied from: http://stackoverflow.com/a/22521619/922184
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__arm64__) && !defined(__aarch64__)
 
     bool avxSupported = false;
     int cpuInfo[4]; cpuid(cpuInfo, 1);
@@ -132,7 +132,7 @@ bool cpu::detect_OS_AVX(){
 }
 bool cpu::detect_OS_AVX512(){
 
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__arm64__) && !defined(__aarch64__)
     if (!detect_OS_AVX())
         return false;
     uint64_t xcrFeatureMask = xgetbv(_XCR_XFEATURE_ENABLED_MASK);
@@ -145,7 +145,7 @@ bool cpu::detect_OS_AVX512(){
 std::string cpu::get_vendor_string(){ int32_t CPUInfo[4]; char name[13];cpuid(CPUInfo, 0); memcpy(name + 0, &CPUInfo[1], 4);memcpy(name + 4, &CPUInfo[3], 4); memcpy(name + 8, &CPUInfo[2], 4); name[12] = '\0'; return name;}
 void cpu::detect_host(){
 
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__arm64__) && !defined(__aarch64__)
 
     OS_x64 = detect_OS_x64();
     OS_AVX = detect_OS_AVX();

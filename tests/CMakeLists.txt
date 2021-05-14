@@ -23,6 +23,7 @@
 #
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
+include_directories(${PROJECT_SOURCE_DIR}/include/fbow)
 
 add_executable(fbow_test_cpu fbow_test_cpu.cpp)
 install(TARGETS fbow_test_cpu RUNTIME DESTINATION bin)

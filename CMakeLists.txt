@@ -183,6 +183,8 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang" 
 
     # warning options
     set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Wall")
+    # suppress warnings: ignoring attributes on template argument '__m256 {aka __vector(8) float}'
+    set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Wno-ignored-attributes") 
     if(WARNINGS_ARE_ERRORS)
         set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Werror")
     endif()

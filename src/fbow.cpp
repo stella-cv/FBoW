@@ -33,6 +33,193 @@ THE SOFTWARE.
 
 namespace fbow{
 
+inline void* AlignedAlloc(int __alignment, int size) {
+    assert(__alignment < 256);
+
+    unsigned char* ptr = (unsigned char*)malloc(size + __alignment);
+
+    if (!ptr)
+        return 0;
+
+    // align the pointer
+
+    size_t lptr = (size_t)ptr;
+    int off = lptr % __alignment;
+    if (off == 0)
+        off = __alignment;
+
+    ptr = ptr + off;                 //move to next aligned address
+    *(ptr - 1) = (unsigned char)off; //save in prev, the offset  to properly remove it
+    return ptr;
+}
+inline void AlignedFree(void* ptr) {
+    unsigned char* uptr = (unsigned char*)ptr;
+    unsigned char off = *(uptr - 1);
+    uptr -= off;
+    std::free(uptr);
+}
+
+////////////////////////////////////////////////////////////
+//base class for computing distances between feature vectors
+template<typename register_type, typename distType, int aligment>
+class Lx {
+public:
+    typedef distType DType;
+    typedef register_type TData;
+
+protected:
+    int _nwords, _aligment, _desc_size;
+    int _block_desc_size_bytes_wp;
+    register_type* feature = 0;
+
+public:
+    virtual ~Lx() {
+        if (feature != 0)
+            AlignedFree(feature);
+    }
+    void setParams(int desc_size, int block_desc_size_bytes_wp) {
+        assert(block_desc_size_bytes_wp % aligment == 0);
+        _desc_size = desc_size;
+        _block_desc_size_bytes_wp = block_desc_size_bytes_wp;
+        assert(_block_desc_size_bytes_wp % sizeof(register_type) == 0);
+        _nwords = _block_desc_size_bytes_wp / sizeof(register_type); //number of aligned words
+        feature = static_cast<register_type*>(AlignedAlloc(aligment, _nwords * sizeof(register_type)));
+        memset(feature, 0, _nwords * sizeof(register_type));
+    }
+    inline void startwithfeature(const register_type* feat_ptr) { memcpy(feature, feat_ptr, _desc_size); }
+    virtual distType computeDist(register_type* fptr) = 0;
+};
+
+struct L2_generic : public Lx<float, float, 4> {
+    virtual ~L2_generic() {}
+    inline float computeDist(float* fptr) {
+        float d = 0;
+        for (int f = 0; f < _nwords; f++)
+            d += (feature[f] - fptr[f]) * (feature[f] - fptr[f]);
+        return d;
+    }
+};
+#if defined(__ANDROID__) || defined(__arm64__) || defined(__aarch64__)
+//fake elements to allow compilation
+struct L2_avx_generic : public Lx<uint64_t, float, 32> {
+    inline float computeDist(uint64_t* ptr) { return std::numeric_limits<float>::max(); }
+};
+struct L2_se3_generic : public Lx<uint64_t, float, 32> {
+    inline float computeDist(uint64_t* ptr) { return std::numeric_limits<float>::max(); }
+};
+struct L2_sse3_16w : public Lx<uint64_t, float, 32> {
+    inline float computeDist(uint64_t* ptr) { return std::numeric_limits<float>::max(); }
+};
+struct L2_avx_8w : public Lx<uint64_t, float, 32> {
+    inline float computeDist(uint64_t* ptr) { return std::numeric_limits<float>::max(); }
+};
+
+#else
+struct L2_avx_generic : public Lx<__m256, float, 32> {
+    virtual ~L2_avx_generic() {}
+    inline float computeDist(__m256* ptr) {
+        __m256 sum = _mm256_setzero_ps(), sub_mult;
+        //substract, multiply and accumulate
+        for (int i = 0; i < _nwords; i++) {
+            sub_mult = _mm256_sub_ps(feature[i], ptr[i]);
+            sub_mult = _mm256_mul_ps(sub_mult, sub_mult);
+            sum = _mm256_add_ps(sum, sub_mult);
+        }
+        sum = _mm256_hadd_ps(sum, sum);
+        sum = _mm256_hadd_ps(sum, sum);
+        float* sum_ptr = (float*)&sum;
+        return sum_ptr[0] + sum_ptr[4];
+    }
+};
+struct L2_se3_generic : public Lx<__m128, float, 16> {
+    inline float computeDist(__m128* ptr) {
+        __m128 sum = _mm_setzero_ps(), sub_mult;
+        //substract, multiply and accumulate
+        for (int i = 0; i < _nwords; i++) {
+            sub_mult = _mm_sub_ps(feature[i], ptr[i]);
+            sub_mult = _mm_mul_ps(sub_mult, sub_mult);
+            sum = _mm_add_ps(sum, sub_mult);
+        }
+        sum = _mm_hadd_ps(sum, sum);
+        sum = _mm_hadd_ps(sum, sum);
+        float* sum_ptr = (float*)&sum;
+        return sum_ptr[0];
+    }
+};
+struct L2_sse3_16w : public Lx<__m128, float, 16> {
+    inline float computeDist(__m128* ptr) {
+        __m128 sum = _mm_setzero_ps(), sub_mult;
+        //substract, multiply and accumulate
+        for (int i = 0; i < 16; i++) {
+            sub_mult = _mm_sub_ps(feature[i], ptr[i]);
+            sub_mult = _mm_mul_ps(sub_mult, sub_mult);
+            sum = _mm_add_ps(sum, sub_mult);
+        }
+        sum = _mm_hadd_ps(sum, sum);
+        sum = _mm_hadd_ps(sum, sum);
+        float* sum_ptr = (float*)&sum;
+        return sum_ptr[0];
+    }
+};
+//specific for surf in avx
+struct L2_avx_8w : public Lx<__m256, float, 32> {
+    inline float computeDist(__m256* ptr) {
+        __m256 sum = _mm256_setzero_ps(), sub_mult;
+        //substract, multiply and accumulate
+
+        for (int i = 0; i < 8; i++) {
+            sub_mult = _mm256_sub_ps(feature[i], ptr[i]);
+            sub_mult = _mm256_mul_ps(sub_mult, sub_mult);
+            sum = _mm256_add_ps(sum, sub_mult);
+        }
+
+        sum = _mm256_hadd_ps(sum, sum);
+        sum = _mm256_hadd_ps(sum, sum);
+        float* sum_ptr = (float*)&sum;
+        return sum_ptr[0] + sum_ptr[4];
+    }
+};
+
+#endif
+
+//generic hamming distance calculator
+struct L1_x64 : public Lx<uint64_t, uint64_t, 8> {
+    inline uint64_t computeDist(uint64_t* feat_ptr) {
+        uint64_t result = 0;
+        for (int i = 0; i < _nwords; ++i)
+            result += std::bitset<64>(feat_ptr[i] ^ feature[i]).count();
+        return result;
+    }
+};
+
+struct L1_x32 : public Lx<uint32_t, uint32_t, 8> {
+    inline uint32_t computeDist(uint32_t* feat_ptr) {
+        uint32_t result = 0;
+        for (int i = 0; i < _nwords; ++i)
+            result += std::bitset<32>(feat_ptr[i] ^ feature[i]).count();
+        return result;
+    }
+};
+
+//for orb
+struct L1_32bytes : public Lx<uint64_t, uint64_t, 8> {
+    inline uint64_t computeDist(uint64_t* feat_ptr) {
+        return uint64_popcnt(feat_ptr[0] ^ feature[0]) + uint64_popcnt(feat_ptr[1] ^ feature[1]) + uint64_popcnt(feat_ptr[2] ^ feature[2]) + uint64_popcnt(feat_ptr[3] ^ feature[3]);
+    }
+    inline uint64_t uint64_popcnt(uint64_t n) {
+        return std::bitset<64>(n).count();
+    }
+};
+//for akaze
+struct L1_61bytes : public Lx<uint64_t, uint64_t, 8> {
+    inline uint64_t computeDist(uint64_t* feat_ptr) {
+        return uint64_popcnt(feat_ptr[0] ^ feature[0]) + uint64_popcnt(feat_ptr[1] ^ feature[1]) + uint64_popcnt(feat_ptr[2] ^ feature[2]) + uint64_popcnt(feat_ptr[3] ^ feature[3]) + uint64_popcnt(feat_ptr[4] ^ feature[4]) + uint64_popcnt(feat_ptr[5] ^ feature[5]) + uint64_popcnt(feat_ptr[6] ^ feature[6]) + uint64_popcnt(feat_ptr[7] ^ feature[7]);
+    }
+    inline uint64_t uint64_popcnt(uint64_t n) {
+        return std::bitset<64>(n).count();
+    }
+};
+
 
 Vocabulary::~Vocabulary(){
     if (_data!=nullptr) AlignedFree( _data);

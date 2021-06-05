@@ -24,13 +24,24 @@ THE SOFTWARE.
 
 */
 
-#ifndef FBOW_FBOW_H_
-#define FBOW_FBOW_H_
+#ifndef FBOW_TYPE_H_
+#define FBOW_TYPE_H_
 
 #include "fbow_exports.h"
-#include "type.h"
-#include "bow_vector.h"
-#include "bow_feat_vector.h"
-#include "vocabulary.h"
 
-#endif // FBOW_FBOW_H_
+namespace fbow {
+
+//float initialized to zero.
+struct FBOW_API _float {
+    float var = 0;
+    inline float operator=(float& f) {
+        var = f;
+        return var;
+    }
+    inline operator float&() { return var; }
+    inline operator float() const { return var; }
+};
+
+} // namespace fbow
+
+#endif // FBOW_TYPE_H_

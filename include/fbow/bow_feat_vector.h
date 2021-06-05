@@ -24,13 +24,28 @@ THE SOFTWARE.
 
 */
 
-#ifndef FBOW_FBOW_H_
-#define FBOW_FBOW_H_
+#ifndef FBOW_BOW_FEAT_VECTOR_H_
+#define FBOW_BOW_FEAT_VECTOR_H_
 
 #include "fbow_exports.h"
-#include "type.h"
-#include "bow_vector.h"
-#include "bow_feat_vector.h"
-#include "vocabulary.h"
+#include <iostream>
+#include <map>
+#include <memory>
+#include <vector>
 
-#endif // FBOW_FBOW_H_
+namespace fbow {
+
+//Bag of words with augmented information. For each word, keeps information about the indices of the elements that have been classified into the word
+//it is computed at the desired level
+struct FBOW_API BoWFeatVector : std::map<uint32_t, std::vector<uint32_t>> {
+    void toStream(std::ostream& str) const;
+
+    void fromStream(std::istream& str);
+
+    //returns a hash identifying this
+    uint64_t hash() const;
+};
+
+} // namespace fbow
+
+#endif // FBOW_BOW_FEAT_VECTOR_H_

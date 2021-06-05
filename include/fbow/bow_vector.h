@@ -24,13 +24,28 @@ THE SOFTWARE.
 
 */
 
-#ifndef FBOW_FBOW_H_
-#define FBOW_FBOW_H_
+#ifndef FBOW_BOW_VECTOR_H_
+#define FBOW_BOW_VECTOR_H_
 
 #include "fbow_exports.h"
 #include "type.h"
-#include "bow_vector.h"
-#include "bow_feat_vector.h"
-#include "vocabulary.h"
+#include <iostream>
+#include <map>
 
-#endif // FBOW_FBOW_H_
+namespace fbow {
+
+/**Bag of words
+ */
+struct FBOW_API BoWVector : std::map<uint32_t, _float> {
+    void toStream(std::ostream& str) const;
+    void fromStream(std::istream& str);
+
+    //returns a hash identifying this
+    uint64_t hash() const;
+    //returns the similitude score between to image descriptors using L2 norm
+    static double score(const BoWVector& v1, const BoWVector& v2);
+};
+
+} // namespace fbow
+
+#endif // FBOW_BOW_VECTOR_H_

@@ -305,6 +305,19 @@ void Vocabulary::transform(const cv::Mat &features, int level,BoWVector &result,
     }
     else throw std::runtime_error("Vocabulary::transform invalid feature type. Should be CV_8UC1 or CV_32FC1");
 
+    ///now, normalize
+    //L2
+    double norm = 0;
+    for (auto e : result) {
+        norm += e.second * e.second;
+    }
+
+    if (norm > 0.0) {
+        double inv_norm = 1. / sqrt(norm);
+        for(auto& e : result) {
+            e.second *= inv_norm;
+        }
+    }
 }
 
 BoWVector Vocabulary::transform(const cv::Mat &features)

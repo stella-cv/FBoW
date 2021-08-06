@@ -293,8 +293,8 @@ set_target_properties(fbow PROPERTIES
 
 target_link_libraries(fbow ${OpenCV_LIBS} ${OpenMP_CXX_LIBRARIES})
 target_include_directories(fbow PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>)
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+        "$<INSTALL_INTERFACE:include>")
 
 install(TARGETS fbow
         EXPORT fbowTargets

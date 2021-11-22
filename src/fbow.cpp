@@ -267,7 +267,7 @@ void Vocabulary::setParams(int aligment, int k, int desc_type, int desc_size, in
 }
 
 void Vocabulary::transform(const cv::Mat &features, int level,BoWVector &result,BoWFeatVector&result2){
-    if (features.rows==0) throw std::runtime_error("Vocabulary::transform No input data");
+    if (features.rows==0) return;
     if (features.type()!=_params._desc_type) throw std::runtime_error("Vocabulary::transform features are of different type than vocabulary");
     if (features.cols *  features.elemSize() !=size_t(_params._desc_size)) throw std::runtime_error("Vocabulary::transform features are of different size than the vocabulary ones");
 
@@ -322,7 +322,8 @@ void Vocabulary::transform(const cv::Mat &features, int level,BoWVector &result,
 
 BoWVector Vocabulary::transform(const cv::Mat &features)
 {
-    if (features.rows==0) throw std::runtime_error("Vocabulary::transform No input data");
+    BoWVector result;
+    if (features.rows==0) return result;
     if (features.type()!=_params._desc_type) throw std::runtime_error("Vocabulary::transform features are of different type than vocabulary");
     if (features.cols *  features.elemSize() !=size_t(_params._desc_size)) throw std::runtime_error("Vocabulary::transform features are of different size than the vocabulary ones");
 
@@ -331,7 +332,6 @@ BoWVector Vocabulary::transform(const cv::Mat &features)
         cpu_info=std::make_shared<cpu>();
         cpu_info->detect_host();
     }
-    BoWVector result;
     //decide the version to employ according to the type of features, aligment and cpu capabilities
     if (_params._desc_type==CV_8UC1){
         //orb

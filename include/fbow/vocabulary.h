@@ -36,7 +36,7 @@ THE SOFTWARE.
 #include <map>
 #include <memory>
 #include <bitset>
-#if !defined(__ANDROID__) && !defined(__arm64__) && !defined(__aarch64__)
+#if !defined(__ANDROID__) && !defined(__arm64__) && !defined(__arm__) && !defined(__aarch64__)
 #include <immintrin.h>
 #endif
 #include "cpu.h"

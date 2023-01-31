@@ -37,7 +37,9 @@ THE SOFTWARE.
 #include <memory>
 #include <bitset>
 #if !defined(__ANDROID__) && !defined(__arm64__) && !defined(__arm__) && !defined(__aarch64__)
+#if defined(USE_AVX)
 #include <immintrin.h>
+#endif
 #endif
 #include "cpu.h"
 

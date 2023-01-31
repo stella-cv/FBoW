@@ -99,7 +99,7 @@ struct L2_generic : public Lx<float, float, 4> {
         return d;
     }
 };
-#if defined(__ANDROID__) || defined(__arm64__) || defined(__arm__) || defined(__aarch64__)
+#if defined(__ANDROID__) || defined(__arm64__) || defined(__arm__) || defined(__aarch64__) || !defined(USE_AVX)
 //fake elements to allow compilation
 struct L2_avx_generic : public Lx<uint64_t, float, 32> {
     inline float computeDist(uint64_t* ptr) { return std::numeric_limits<float>::max(); }

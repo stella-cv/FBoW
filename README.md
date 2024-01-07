@@ -10,7 +10,7 @@ In transforming an image into Bag of Words using on machines with AVX instructio
 ## Build
 
 ```bash
-$ git clone https://github.com/shinsumicco/FBoW.git
+$ git clone https://github.com/stella-cv/FBoW.git
 $ cd FBoW && mkdir build && cd build
 $ cmake .. -DBUILD_TESTS=ON -DBUILD_UTILS=ON
 $ make

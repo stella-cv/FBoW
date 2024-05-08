@@ -26,13 +26,9 @@
 #   BASIC CONFIGURATION
 # ------------------------------------------------------
 
-cmake_minimum_required(VERSION 2.9)
+cmake_minimum_required(VERSION 3.12)
 
-project(fbow CXX C)
-
-if(NOT POLICY CMP0054)
-    cmake_policy(SET CMO0054 NEW)
-endif()
+project(fbow CXX)
 
 # Disable in-source build
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
@@ -58,7 +54,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # ------------------------------------------------------
-#   library names and directries
+#   library names and directories
 # ------------------------------------------------------
 
 set(PROJECT_DLL_VERSION "${PROJECT_VERSION_MAJOR}${PROJECT_VERSION_MINOR}${PROJECT_VERSION_PATCH}")
@@ -70,15 +66,10 @@ else()
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_INSTALL_PREFIX}/lib/cmake/" "/usr/lib/cmake" "/usr/local/lib/cmake")
 endif()
 
-option(USE_OWN_EIGEN3 "Set to OFF to use a standard eigen3 version" ON)
-option(BUILD_UTILS "Set to ON to build utils" OFF)
-option(BUILD_TESTS "Set to ON to build tests" OFF)
-option(BUILD_SHARED_LIBS "Set to OFF to build static libraries" ON)
-option(USE_CONTRIB "Set ON to use OpenCV contrib modules" OFF)
-
-option(USE_AVX "Set on/off" ON)
-option(USE_SSE3 "Set on/off" ON)
-option(USE_SSE4 "Set on/off" ON)
+option(BUILD_UTILS "Build utils" OFF)
+option(BUILD_TESTS "Build tests" OFF)
+option(BUILD_SHARED_LIBS "Build static libraries" ON)
+option(USE_CONTRIB "Use xfeatures2d from OpenCV contrib modules" OFF)
 
 # ------------------------------------------------------
 #   find dependencies
@@ -94,8 +85,6 @@ endif()
 if(USE_CONTRIB)
     add_definitions(-DUSE_CONTRIB)
 endif()
-
-set(REQUIRED_LIBRARIES "${OpenCV_LIBS}")
 
 # ------------------------------------------------------
 #   PROJECT CONFIGURATION
@@ -120,34 +109,28 @@ install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake" DESTINATION "s
 #   program optimization and debug options
 # ------------------------------------------------------
 
+set(CMAKE_CXX_STANDARD 11)
+
 set(WARNINGS_ARE_ERRORS OFF CACHE BOOL "Treat warnings as errors")
 
-set(EXTRA_C_FLAGS "")
-set(EXTRA_C_FLAGS_RELEASE "")
-set(EXTRA_C_FLAGS_DEBUG "")
-
-set(EXTRA_EXE_LINKER_FLAGS "")
-set(EXTRA_EXE_LINKER_FLAGS_RELEASE "")
-set(EXTRA_EXE_LINKER_FLAGS_DEBUG "")
-
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR MINGW)
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "AppleClang" OR MINGW)
     # profiling option
     set(ENABLE_PROFILING OFF CACHE BOOL "Enable profiling in the GCC/Clang compiler (Add flags: -g -pg)")
     # option for omitting frame pointer
     set(USE_OMIT_FRAME_POINTER ON BOOL "Enable -fomit-frame-pointer for GCC/Clang")
 
     # select optimization level
-    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES arm*)
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES arm*)
         # ARM system
         set(USE_O2 ON CACHE BOOL "Enable -O2 for GCC/Clang")
         set(USE_FAST_MATH OFF CACHE BOOL "Enable -ffast-math for GCC/Clang")
     endif()
-    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES powerpc*)
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES powerpc*)
         # PowerPC system
         set(USE_O3 ON CACHE BOOL "Enable -O3 for GCC/Clang")
         set(USE_POWERPC ON CACHE BOOL "Enable PowerPC for GCC/Clang")
     endif ()
-    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES amd64* OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES x86_64*)
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES amd64* OR CMAKE_SYSTEM_PROCESSOR MATCHES x86_64*)
         # 64bit system
         set(USE_O3 ON CACHE BOOL "Enable -O3 for GCC/Clang")
         set(USE_FAST_MATH OFF CACHE BOOL "Enable -ffast-math for GCC/Clang")
@@ -157,7 +140,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang" 
         set(USE_SSE3 ON CACHE BOOL "Enable SSE3 for GCC/Clang")
         set(USE_SSE4 ON CACHE BOOL "Enable SSE4 for GCC/Clang")
     endif()
-    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES i686* OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES x86)
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES i686* OR CMAKE_SYSTEM_PROCESSOR MATCHES x86)
         # 32bit system
         set(USE_O3 ON CACHE BOOL "Enable -O3 for GCC/Clang")
         set(USE_FAST_MATH OFF CACHE BOOL "Enable -ffast-math for GCC/Clang")
@@ -167,7 +150,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang" 
         set(USE_SSE3 OFF CACHE BOOL "Enable SSE3 for GCC/Clang")
         set(USE_SSE4 OFF CACHE BOOL "Enable SSE4 for GCC/Clang")
     endif()
-    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES aarch64*)
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES aarch64*)
         # aarch64 system
         set(USE_O2 ON CACHE BOOL "Enable -O2 for GCC/Clang")
         set(USE_FAST_MATH OFF CACHE BOOL "Enable -ffast-math for GCC/Clang")
@@ -182,33 +165,33 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang" 
     endif()
 
     # warning options
-    set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Wall")
+    set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -Wall")
     # suppress warnings: ignoring attributes on template argument '__m256 {aka __vector(8) float}'
-    set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Wno-ignored-attributes") 
+    set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -Wno-ignored-attributes")
     if(WARNINGS_ARE_ERRORS)
-        set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Werror")
+        set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -Werror")
     endif()
 
     # -Wno-long-long is required in 64bit systems when including sytem headers
-    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES x86_64* OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES amd64*)
-		set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Wno-long-long")
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES x86_64* OR CMAKE_SYSTEM_PROCESSOR MATCHES amd64*)
+		set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -Wno-long-long")
     endif()
 
     # apply options
     if(NOT ENABLE_PROFILING AND USE_OMIT_FRAME_POINTER)
-        set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} -fomit-frame-pointer")
+        set(EXTRA_CXX_FLAGS_RELEASE "${EXTRA_CXX_FLAGS_RELEASE} -fomit-frame-pointer")
     endif()
     if(USE_O2)
-        set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} -O2")
+        set(EXTRA_CXX_FLAGS_RELEASE "${EXTRA_CXX_FLAGS_RELEASE} -O2")
     endif()
     if(USE_O3)
-        set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} -O3")
+        set(EXTRA_CXX_FLAGS_RELEASE "${EXTRA_CXX_FLAGS_RELEASE} -O3")
     endif()
     if(USE_FAST_MATH)
-        set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} -ffast-math")
+        set(EXTRA_CXX_FLAGS_RELEASE "${EXTRA_CXX_FLAGS_RELEASE} -ffast-math")
     endif()
     if(USE_POWERPC)
-        set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} -mcpu=G3 -mtune=G5")
+        set(EXTRA_CXX_FLAGS_RELEASE "${EXTRA_CXX_FLAGS_RELEASE} -mcpu=G3 -mtune=G5")
     endif()
 
     # apply vectorization
@@ -232,51 +215,36 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang" 
         set(VECTORIAL_INSTRUCTIONS "${VECTORIAL_INSTRUCTIONS} -msse4.1")
         add_definitions(-DUSE_SSE4)
     endif()
-    IF(USE_AVX) 
+    IF(USE_AVX)
         set(VECTORIAL_INSTRUCTIONS "${VECTORIAL_INSTRUCTIONS} -mavx")
         add_definitions(-DUSE_AVX)
     endif()
 
     if(ENABLE_PROFILING)
-        set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} -pg -g")
+        set(EXTRA_CXX_FLAGS_RELEASE "${EXTRA_CXX_FLAGS_RELEASE} -pg -g")
     else()
         if(NOT APPLE)
-            set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -ffunction-sections")
+            set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -ffunction-sections")
         endif()
     endif()
 
-    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES armv7l)
-        set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE}")
-    endif()
-
-    set(CMAKE_CXX_FLAGS "${VECTORIAL_INSTRUCTIONS} ${EXTRA_C_FLAGS} -std=c++11 ")
-    set(CMAKE_CXX_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} -DNDEBUG -D_NDEBUG")
+    set(CMAKE_CXX_FLAGS "${VECTORIAL_INSTRUCTIONS} ${EXTRA_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS_RELEASE "${EXTRA_CXX_FLAGS_RELEASE} -DNDEBUG -D_NDEBUG")
     set(CMAKE_CXX_FLAGS_DEBUG "-g3 -DDEBUG -D_DEBUG")
     set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g3 -DDEBUG -D_DEBUG")
-else()
-    add_definitions(-DNOMINMAX)
 endif()
 
-find_package(OpenMP)
-if(OPENMP_FOUND)
-    add_compile_options(-DUSE_OPENMP)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}${OpenMP_C_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}${OpenMP_CXX_FLAGS}")
-endif()
-
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}${CMAKE_CXX_FLAGS}")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}${CMAKE_CXX_FLAGS}")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}${CMAKE_CXX_FLAGS}")
-
-set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} ${EXTRA_EXE_LINKER_FLAGS})
-set(CMAKE_EXE_LINKER_FLAGS_RELEASE ${CMAKE_EXE_LINKER_FLAGS_RELEASE} ${EXTRA_EXE_LINKER_FLAGS_RELEASE})
-set(CMAKE_EXE_LINKER_FLAGS_DEBUG ${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${EXTRA_EXE_LINKER_FLAGS_DEBUG})
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} ${CMAKE_CXX_FLAGS}")
 
 # ------------------------------------------------------
 #   fbow library
 # ------------------------------------------------------
 
-add_definitions(-DNOMINMAX)
+if(WIN32)
+    add_definitions(-DNOMINMAX)
+endif()
 
 set(SOURCES
     src/fbow.cpp
@@ -291,7 +259,20 @@ set_target_properties(fbow PROPERTIES
         CLEAN_DIRECT_OUTPUT 1
         OUTPUT_NAME ${PROJECT_NAME})
 
-target_link_libraries(fbow ${OpenCV_LIBS} ${OpenMP_CXX_LIBRARIES})
+find_package(OpenMP)
+if(OPENMP_FOUND)
+    add_compile_options(-DUSE_OPENMP)
+    target_link_libraries(fbow PRIVATE OpenMP::OpenMP_CXX)
+endif()
+
+target_link_libraries(fbow
+    PUBLIC
+        opencv_core
+    PRIVATE
+        opencv_features2d
+        opencv_highgui
+        "$<$<BOOL:${USE_CONTRIB}>:opencv_xfeatures2d>"
+)
 target_include_directories(fbow PUBLIC
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
         "$<INSTALL_INTERFACE:include>")

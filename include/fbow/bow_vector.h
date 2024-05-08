@@ -29,6 +29,7 @@ THE SOFTWARE.
 
 #include "fbow_exports.h"
 #include "type.h"
+#include <cstdint>
 #include <iostream>
 #include <map>
 
